@@ -18,7 +18,7 @@ type User struct {
 	Token        string
 }
 
-func NewUser(username string, email string, password string, userType string) (*User, error) {
+func NewUser(username string, email string, password string, userType string, token string) (*User, error) {
 	ut, err := parseUserAppType(userType)
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func NewUser(username string, email string, password string, userType string) (*
 		Email:        email,
 		PasswordHash: password,
 		UserType:     ut,
-		Token:        "token_test",
+		Token:        token,
 	}, nil
 }
 
