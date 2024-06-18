@@ -1,6 +1,10 @@
 package user
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/rs/xid"
+)
 
 type userAppType string
 
@@ -25,7 +29,7 @@ func NewUser(username string, email string, password string, userType string, to
 	}
 
 	return &User{
-		ID:           "id_test",
+		ID:           xid.New().String(),
 		Username:     username,
 		Email:        email,
 		PasswordHash: password,

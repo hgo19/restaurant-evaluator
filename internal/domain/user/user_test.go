@@ -16,7 +16,7 @@ func Test_NewUser_SuccessCase(t *testing.T) {
 
 	user, _ := NewUser(username, email, password, userType, token)
 
-	assert.Equal(user.ID, "id_test")
+	assert.NotEmpty(user.ID)
 	assert.Equal(user.Username, "user test")
 	assert.Equal(user.Email, "foo@bar.com")
 	assert.Equal(Consumer, user.UserType)
