@@ -6,15 +6,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_NewUser_SuccessCase(t *testing.T) {
-	assert := assert.New(t)
-	username := "user test"
-	email := "foo@bar.com"
-	password := "testPassword1@"
-	userType := "Consumer"
-	token := "token_for_test"
+var (
+	username = "user test"
+	email    = "foo@bar.com"
+	password = "testPassword1@"
+	token    = "token_for_test"
+)
 
-	user, _ := NewUser(username, email, password, userType, token)
+func Test_NewUser_CustomerSuccessCase(t *testing.T) {
+	assert := assert.New(t)
+	userCustomerType := "Consumer"
+
+	user, _ := NewUser(username, email, password, userCustomerType, token)
 
 	assert.NotEmpty(user.ID)
 	assert.Equal(user.Username, "user test")
@@ -22,15 +25,20 @@ func Test_NewUser_SuccessCase(t *testing.T) {
 	assert.Equal(Consumer, user.UserType)
 }
 
+func Test_NewUser_OwnerSuccessCase(t *testing.T) {
+	assert := assert.New(t)
+	userOwnerType := "Owner"
+
+	user, _ := NewUser(username, email, password, userOwnerType, token)
+
+	assert.Equal(Owner, user.UserType)
+}
+
 func Test_NewUser_InvalidUserType(t *testing.T) {
 	assert := assert.New(t)
-	username := "user test"
-	email := "foo@bar.com"
-	password := "testPassword1@"
-	userType := "InvalidType"
-	token := "token_for_test"
+	userInvalidType := "InvalidTypeUser"
 
-	_, err := NewUser(username, email, password, userType, token)
+	_, err := NewUser(username, email, password, userInvalidType, token)
 
 	assert.Error(err)
 	assert.EqualError(err, "invalid user type")
