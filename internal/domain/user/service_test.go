@@ -17,16 +17,22 @@ func (r *repositoryMock) Save(user *User) error {
 	return args.Error(0)
 }
 
-func Test_Create_User(t *testing.T) {
-	assert := assert.New(t)
-	userDto := dto.NewUser{
+var (
+	repository = new(repositoryMock)
+	userDto    = dto.NewUser{
 		Username:     "valid_name",
 		Email:        "valid@email.com",
 		PasswordHash: "valid_passwordHash",
 		UserType:     "Consumer",
 		Token:        "valid_token",
 	}
-	repository := new(repositoryMock)
+	service = Service{
+		Repository: repository,
+	}
+)
+
+func Test_Create_User(t *testing.T) {
+	assert := assert.New(t)
 	repository.On("Save", mock.MatchedBy(func(user *User) bool {
 		if user.Username != userDto.Username {
 			return false
@@ -42,14 +48,20 @@ func Test_Create_User(t *testing.T) {
 		return true
 	})).Return(nil)
 
-	service := Service{
-		Repository: repository,
-	}
-
 	id, err := service.Create(userDto)
 
 	assert.Nil(err)
 	assert.NotNil(id)
+	repository.AssertExpectations(t)
+}
 
+func Test_Create_User_ValidateDomainsErrors(t *testing.T) {
+	assert := assert.New(t)
+	userDto.Username = ""
+
+	_, err := service.Create(userDto)
+
+	assert.NotNil(err)
+	assert.Equal(err.Error(), "Username is required with min 5")
 	repository.AssertExpectations(t)
 }
