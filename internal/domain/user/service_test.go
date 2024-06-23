@@ -1,6 +1,7 @@
 package user
 
 import (
+	"errors"
 	"restaurant-evaluator/internal/dto"
 	"testing"
 
@@ -63,5 +64,19 @@ func Test_Create_User_ValidateDomainsErrors(t *testing.T) {
 
 	assert.NotNil(err)
 	assert.Equal(err.Error(), "Username is required with min 5")
+	repository.AssertExpectations(t)
+}
+
+func Test_Create_User_ValidateRepositoryErrors(t *testing.T) {
+	assert := assert.New(t)
+	userDto.Username = "valid_username"
+	repositoryMockErr := new(repositoryMock)
+	repositoryMockErr.On("Save", mock.Anything).Return(errors.New("error to persist data"))
+	service.Repository = repositoryMockErr
+
+	_, err := service.Create(userDto)
+
+	assert.NotNil(err)
+	assert.Equal(err.Error(), "error to persist data")
 	repository.AssertExpectations(t)
 }
