@@ -5,5 +5,4 @@ type NewUser struct {
 	Email        string
 	PasswordHash string
 	UserType     string
-	Token        string
 }
