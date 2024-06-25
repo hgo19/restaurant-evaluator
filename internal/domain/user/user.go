@@ -20,10 +20,9 @@ type User struct {
 	Email        string      `validate:"email"`
 	PasswordHash string      `validate:"required"`
 	UserType     userAppType `validate:"required"`
-	Token        string      `validate:"required"`
 }
 
-func NewUser(username string, email string, password string, userType string, token string) (*User, error) {
+func NewUser(username string, email string, password string, userType string) (*User, error) {
 	ut, errUserType := parseUserAppType(userType)
 	if errUserType != nil {
 		return nil, errUserType
@@ -35,7 +34,6 @@ func NewUser(username string, email string, password string, userType string, to
 		Email:        email,
 		PasswordHash: password,
 		UserType:     ut,
-		Token:        token,
 	}
 
 	err := internalerrors.ValidateStruct(user)

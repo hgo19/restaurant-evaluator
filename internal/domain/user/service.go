@@ -12,13 +12,8 @@ type Service struct {
 }
 
 func (s *Service) Create(newUser dto.NewUser) (string, error) {
-	token, err := s.TokenGenerator.GenerateToken(newUser.Username, newUser.Email)
 
-	if err != nil {
-		return "", errors.New("token not generated")
-	}
-
-	user, err := NewUser(newUser.Username, newUser.Email, newUser.PasswordHash, newUser.UserType, token)
+	user, err := NewUser(newUser.Username, newUser.Email, newUser.PasswordHash, newUser.UserType)
 	if err != nil {
 		return "", err
 	}
@@ -28,5 +23,11 @@ func (s *Service) Create(newUser dto.NewUser) (string, error) {
 		return "", err
 	}
 
-	return user.Token, nil
+	token, err := s.TokenGenerator.GenerateToken(user.Username, user.Email)
+
+	if err != nil {
+		return "", errors.New("token not generated")
+	}
+
+	return token, nil
 }

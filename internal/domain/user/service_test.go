@@ -54,8 +54,6 @@ func Test_Create_User(t *testing.T) {
 			return false
 		} else if user.UserType != userAppType(userDto.UserType) {
 			return false
-		} else if user.Token != "mocked_token" {
-			return false
 		}
 		return true
 	})).Return(nil)
