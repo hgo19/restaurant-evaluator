@@ -1,9 +1,9 @@
 package user
 
 import (
-	"errors"
 	"restaurant-evaluator/internal/adapters"
 	"restaurant-evaluator/internal/dto"
+	internalerrors "restaurant-evaluator/internal/internal-errors"
 )
 
 type Service struct {
@@ -18,15 +18,15 @@ func (s *Service) Create(newUser dto.NewUser) (string, error) {
 		return "", err
 	}
 
-	err = s.Repository.Save(user)
-	if err != nil {
-		return "", err
-	}
-
 	token, err := s.TokenGenerator.GenerateToken(user.Username, user.Email)
 
 	if err != nil {
-		return "", errors.New("token not generated")
+		return "", internalerrors.ErrInternal
+	}
+
+	err = s.Repository.Save(user)
+	if err != nil {
+		return "", internalerrors.ErrInternal
 	}
 
 	return token, nil
