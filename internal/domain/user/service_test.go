@@ -111,3 +111,19 @@ func Test_Create_User_ValidateTokenGenerate(t *testing.T) {
 	tokenAdapter.AssertExpectations(t)
 	repository.AssertExpectations(t)
 }
+
+func Test_Create_User_ValidateTokenGenerateErrors(t *testing.T) {
+	assert := assert.New(t)
+
+	tokenAdapterErr := new(tokenAdapterMock)
+	tokenAdapterErr.On("GenerateToken", userDto.Username, userDto.Email).Return("", errors.New("random error"))
+	repository.On("Save", mock.Anything).Return(nil)
+	service.TokenGenerator = tokenAdapterErr
+	token, err := service.Create(userDto)
+
+	assert.NotNil(err)
+	assert.Equal("", token)
+	assert.EqualError(err, "token not generated")
+	tokenAdapter.AssertExpectations(t)
+	repository.AssertExpectations(t)
+}
