@@ -103,7 +103,7 @@ func Test_Create_User_ValidateTokenGenerate(t *testing.T) {
 
 	tokenAdapter.On("GenerateToken", userDto.Username, userDto.Email).Return("mocked_token", nil)
 	repository.On("Save", mock.Anything).Return(nil)
-
+	service.Repository = repository
 	token, err := service.Create(userDto)
 
 	assert.Nil(err)
