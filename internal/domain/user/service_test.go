@@ -3,6 +3,7 @@ package user
 import (
 	"errors"
 	"restaurant-evaluator/internal/dto"
+	internalerrors "restaurant-evaluator/internal/internal-errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -70,15 +71,11 @@ func Test_Create_User(t *testing.T) {
 func Test_Create_User_ValidateDomainsErrors(t *testing.T) {
 	assert := assert.New(t)
 	userDto.PasswordHash = ""
-	tokenAdapter.On("GenerateToken", userDto.Username, userDto.Email).Return("mocked_token", nil)
 
 	_, err := service.Create(userDto)
 
 	assert.NotNil(err)
 	assert.Equal(err.Error(), "PasswordHash is required")
-	repository.AssertExpectations(t)
-	tokenAdapter.AssertExpectations(t)
-
 }
 
 func Test_Create_User_ValidateRepositoryErrors(t *testing.T) {
@@ -92,7 +89,7 @@ func Test_Create_User_ValidateRepositoryErrors(t *testing.T) {
 	_, err := service.Create(userDto)
 
 	assert.NotNil(err)
-	assert.Equal(err.Error(), "error to persist data")
+	assert.Equal(err, internalerrors.ErrInternal)
 	repository.AssertExpectations(t)
 	tokenAdapter.AssertExpectations(t)
 
@@ -117,13 +114,11 @@ func Test_Create_User_ValidateTokenGenerateErrors(t *testing.T) {
 
 	tokenAdapterErr := new(tokenAdapterMock)
 	tokenAdapterErr.On("GenerateToken", userDto.Username, userDto.Email).Return("", errors.New("random error"))
-	repository.On("Save", mock.Anything).Return(nil)
 	service.TokenGenerator = tokenAdapterErr
 	token, err := service.Create(userDto)
 
 	assert.NotNil(err)
 	assert.Equal("", token)
-	assert.EqualError(err, "token not generated")
+	assert.Equal(err, internalerrors.ErrInternal)
 	tokenAdapter.AssertExpectations(t)
-	repository.AssertExpectations(t)
 }
