@@ -1,8 +1,8 @@
 package dto
 
 type NewUser struct {
-	Username     string
-	Email        string
-	PasswordHash string
-	UserType     string
+	Username string
+	Email    string
+	Password string
+	UserType string
 }
