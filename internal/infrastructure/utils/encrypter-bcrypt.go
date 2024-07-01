@@ -9,7 +9,7 @@ import (
 
 type EncrypterBcrypt struct{}
 
-func (e EncrypterBcrypt) HashPassword(password string) (string, error) {
+func (e *EncrypterBcrypt) HashPassword(password string) (string, error) {
 	saltRound, err := strconv.Atoi(os.Getenv("SALT_ROUNDS"))
 	if err != nil {
 		println("Error to convert .env salt_rounds to int")
