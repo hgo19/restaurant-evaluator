@@ -1,0 +1,12 @@
+GET http://localhost:3001
+
+###
+
+POST http://localhost:3001/signup
+
+{
+  "Username": "Rodolfo Landin",
+	"Email": "email@test.com",
+	"Password": "rodolfoTest2#",
+	"UserType": "Owner"
+}
