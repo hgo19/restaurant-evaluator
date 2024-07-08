@@ -34,7 +34,7 @@ func main() {
 		UserService: userService,
 	}
 
-	r.Post("/signup", handler.UserPost)
+	r.Post("/signup", endpoints.HandlerError(handler.UserPost))
 
 	http.ListenAndServe(":3001", r)
 }
