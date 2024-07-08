@@ -34,7 +34,9 @@ func main() {
 		UserService: userService,
 	}
 
-	r.Post("/signup", endpoints.HandlerError(handler.Register))
+	r.Route("/public", func(r chi.Router) {
+		r.Post("/signup", endpoints.HandlerError(handler.Register))
+	})
 
 	http.ListenAndServe(":3001", r)
 }
