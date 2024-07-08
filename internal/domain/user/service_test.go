@@ -31,7 +31,7 @@ func (r *repositoryMock) Save(user *User) error {
 var (
 	repository = new(repositoryMock)
 	encrypter  = new(encrypterMock)
-	userDto    = dto.NewUser{
+	userDto    = dto.User{
 		Username: "valid_name",
 		Email:    "valid@email.com",
 		Password: "valid_passwordHash",

@@ -11,7 +11,7 @@ type Service struct {
 	Encrypter  adapters.Encrypter
 }
 
-func (s *Service) Create(newUser dto.NewUser) (string, error) {
+func (s *Service) Create(newUser dto.User) (string, error) {
 
 	passwordHash, err := s.Encrypter.HashPassword(newUser.Password)
 
