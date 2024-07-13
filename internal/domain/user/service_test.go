@@ -10,12 +10,21 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+type tokenAuthMock struct {
+	mock.Mock
+}
+
+func (t *tokenAuthMock) Generate(email string) (string, error) {
+	args := t.Called(email)
+	return args.String(0), args.Error(1)
+}
+
 type encrypterMock struct {
 	mock.Mock
 }
 
-func (r *encrypterMock) HashPassword(password string) (string, error) {
-	args := r.Called(password)
+func (e *encrypterMock) HashPassword(password string) (string, error) {
+	args := e.Called(password)
 	return args.String(0), args.Error(1)
 }
 
@@ -28,9 +37,25 @@ func (r *repositoryMock) Save(user *User) error {
 	return args.Error(0)
 }
 
+func (r *repositoryMock) FindByEmail(email string) (*User, error) {
+	args := r.Called(email)
+	if args.Get(0) != nil {
+		return args.Get(0).(*User), args.Error(1)
+	}
+	return nil, args.Error(1)
+}
+
 var (
+	userBaseEntity = User{
+		ID:           "valid_id",
+		Username:     "valid_username",
+		Email:        "valid@email.com",
+		PasswordHash: "valid_password",
+		UserType:     Consumer,
+	}
 	repository = new(repositoryMock)
 	encrypter  = new(encrypterMock)
+	tokenAuth  = new(tokenAuthMock)
 	userDto    = dto.User{
 		Username: "valid_name",
 		Email:    "valid@email.com",
@@ -40,6 +65,7 @@ var (
 	service = Service{
 		Repository: repository,
 		Encrypter:  encrypter,
+		TokenAuth:  tokenAuth,
 	}
 )
 
@@ -108,4 +134,64 @@ func Test_Create_User_ValidateEncrypterErrors(t *testing.T) {
 	assert.NotNil(err)
 	assert.EqualError(err, internalerrors.ErrInternal.Error())
 	encrypterErr.AssertExpectations(t)
+}
+
+func Test_GenerateToken_Success(t *testing.T) {
+	assert := assert.New(t)
+	validToken := "valid@token"
+
+	service.Repository = repository
+	service.Encrypter = encrypter
+	repository.On("FindByEmail", email).Return(&userBaseEntity, nil)
+	tokenAuth.On("Generate", email).Return(validToken, nil)
+
+	token, _ := service.GenerateToken(email)
+
+	assert.NotNil(token)
+	assert.Equal(token, validToken)
+	repository.AssertExpectations(t)
+	tokenAuth.AssertExpectations(t)
+
+}
+
+func Test_GenerateToken_Repository_Error(t *testing.T) {
+	assert := assert.New(t)
+	email := "invalid@email.com"
+	repositoryMockErr := new(repositoryMock)
+	service.Repository = repositoryMockErr
+	repositoryMockErr.On("FindByEmail", email).Return(nil, errors.New("database found error"))
+
+	_, err := service.GenerateToken(email)
+
+	assert.NotNil(err)
+	assert.EqualError(err, internalerrors.ErrInternal.Error())
+	repository.AssertExpectations(t)
+}
+
+func Test_GenerateToken_Repository_NotFound(t *testing.T) {
+	assert := assert.New(t)
+	email := "invalid@email.com"
+	service.Repository = repository
+	repository.On("FindByEmail", email).Return(nil, nil)
+
+	_, err := service.GenerateToken(email)
+
+	assert.NotNil(err)
+	assert.EqualError(err, internalerrors.NotFound.Error())
+	repository.AssertExpectations(t)
+}
+
+func Test_GenerateToken_TokenAuth_Error(t *testing.T) {
+	assert := assert.New(t)
+	email := "valid@email.com"
+	tokenAuthMockErr := new(tokenAuthMock)
+	service.TokenAuth = tokenAuthMockErr
+	repository.On("FindByEmail", email).Return(&userBaseEntity, nil)
+	tokenAuthMockErr.On("Generate", email).Return("", errors.New("Some error to generate token"))
+
+	_, err := service.GenerateToken(email)
+
+	assert.NotNil(err)
+	assert.EqualError(err, internalerrors.ErrInternal.Error())
+	repository.AssertExpectations(t)
 }
