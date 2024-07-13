@@ -16,6 +16,8 @@ func HandlerError(endpointFunc EndpointsFunc) http.HandlerFunc {
 		if err != nil {
 			if errors.Is(err, internalerrors.ErrInternal) {
 				render.Status(r, 500)
+			} else if errors.Is(err, internalerrors.NotFound) {
+				render.Status(r, 404)
 			} else {
 				render.Status(r, 400)
 			}
